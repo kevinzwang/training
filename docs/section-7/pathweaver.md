@@ -49,3 +49,84 @@ There are three steps to an autonomous path command:
 It is highly recommended that you use the [`andThen()`](https://first.wpi.edu/FRC/roborio/release/docs/java/edu/wpi/first/wpilibj2/command/Command.html#andThen(edu.wpi.first.wpilibj2.command.Command...)) method from the Command class to schedule these processes.
 
 That's it! Pathweaver is a powerful and simple tool that lets you do incredible things. You could create a command group to turn on a feeder mechanism, drive a trajectory, align to a target, run a shooter mechanism, and drive to pick up more game elements.
+
+## PathPlanner Tool
+Our more recent robots use the [`PathPlanner`](https://pathplanner.dev/home.html) tool for our autonomous as it is an easy and efficient way to set up pathways
+
+So how exactly do we set this up and get the paths running?
+
+1. Setup in RobotContainer
+-Firstoff, we want to settup and import PathPlanner into RobotContainer. We will generally use this template to help us configure the PathPlanner tool.  Always reference to the [`PathPlanner Docs`](https://pathplanner.dev/home.html) whenever you are configuring the autonomous. 
+-Here when setting up the auto, we want to get constants such as robot's current positions and plug it into the methods, that way PathPlanner knows where our robot is
+``` Java
+public class DriveSubsystem extends SubsystemBase {
+  public DriveSubsystem() {
+    // All other subsystem initialization
+    // ...
+
+    // Load the RobotConfig from the GUI settings. You should probably
+    // store this in your Constants file
+    RobotConfig config;
+    try{
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+
+    // Configure AutoBuilder last
+    AutoBuilder.configure(
+            this::getPose, // Robot pose supplier
+            this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+            ),
+            config, // The robot configuration
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+    );
+  }
+}
+```
+
+2. Creating Named Commands
+    -Now that we have configured our autonomous, we need to create named commands to store the methods we will use in the PathPlanner tool(Example: Shooter Commands)
+    
+    -We always want to name our commands, that way we know which one to use when creating our autonomous
+    
+    -Then we want to run one actual command we created such as shooter so we would put the command name in there, and list the subsystem name as one of the parameters that way it knows what subsytem to use
+
+``` Java
+public class RobotContainer() {
+    public RobotContainer() {
+        // Subsystem initialization
+        swerve = new Swerve();
+        exampleSubsystem = new ExampleSubsystem();
+
+        // Register Named Commands
+        NamedCommands.registerCommand("autoBalance", swerve.autoBalanceCommand());
+        NamedCommands.registerCommand("exampleCommand", exampleSubsystem.exampleCommand());
+        NamedCommands.registerCommand("someOtherCommand", new SomeOtherCommand());
+        //Example of a command we used on our bot
+        NamedCommands.registerCommand("PassToOuttake", new PassToOuttake(intakeShooter));
+
+        // Do all other initialization
+        configureButtonBindings();
+
+        // ...
+    }
+}
+```
