@@ -138,16 +138,21 @@ What this code does is that it gets the autonomous we chose from SmartDashboard 
 ## creating autos!
 Now that we have settup the neccesary code for auto, you can start creating autos and setting up paths.  One of the best parts of the autonomous creation process.
 
-Open up your PathPlanner app, and open your robot project.  Once that is finished, your going to create a new path.  
+Open up your PathPlanner app, and open your robot project.  Once that is finished, your going to create a new path, and set the robot's starting postion on the field(the green box).  You can add paths by simply clicking on add a waypoint and moving it.  Once you have a path created, exit out of your path creation and head to the autos section.  The autos section is where you can combine paths and commands(like shoot) to make a fully functioning autonomous.  It's pretty similar to creating a path.  When creating an auto, you are going to add your different paths and registered commands from robot container to your auto.  Once you have an auto created, it should automatically register on your source branch, and you can commit it!
+
+![PathPlanner](PathPlanner).png)
+
+![PathPlanner Paths](PathPlanner_Paths.png)
+
+![PathPlanner Autos](PathPlanner_Autos.png)
 
 That's about it, have fun creating your autonomous code!
+
 
 ## PathWeaver Section(Old Stuff)
 One advantage of a characterized drivetrain is that it more effectively drives the robot to a precise location. This makes following autonomous paths a more viable option. All we need to do is tell the robot a specific path to follow and the robot will drive the path pretty accurately.
 
 But how do we specify these paths? We use the `Trajectory` class along with WPILib's Pathweaver tool. For a more detailed description of how to use this class, check out WPIlib's [documentation](https://docs.wpilib.org/en/stable/docs/software/examples-tutorials/trajectory-tutorial/index.html).
-
-Let's write some autonomous code!
 
 ## Trajectories
 The [`Trajectory`](https://first.wpi.edu/FRC/roborio/release/docs/java/edu/wpi/first/wpilibj/trajectory/Trajectory.html) class creates a smooth path through a list of states. Each state contains information such as the position on the field, time elapsed, velocity, acceleration, pose, and the curvature of the path. Once you have built your paths using Pathweaver, you can use the [`fromPathweaverJson()`](https://first.wpi.edu/FRC/roborio/release/docs/java/edu/wpi/first/wpilibj/trajectory/TrajectoryUtil.html#fromPathweaverJson(java.nio.file.Path)) method from [`TrajectoryUtil`](https://first.wpi.edu/FRC/roborio/release/docs/java/edu/wpi/first/wpilibj/trajectory/TrajectoryUtil.html) to create a Trajectory from the built path. This will be the primary way in which we create our `Trajectory` objects.
